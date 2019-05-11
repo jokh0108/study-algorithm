@@ -19,6 +19,7 @@ def solution(pattern):
                    (1, 2): 4, (2, 2): 5, (3, 2): 6,
                    (1, 1): 7, (2, 1): 8, (3, 1): 9
                    }
+                   
     lines = {}
     for i in range(len(pattern) - 1):
         m = min(pattern[i], pattern[i+1])
