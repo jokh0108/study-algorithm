@@ -1,6 +1,5 @@
 import sys
 input = sys.stdin.readline
-print = sys.stdout.write
 N = int(input())
 stack = []
 for _ in range(N):
