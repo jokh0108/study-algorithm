@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7c906bd4-9302-47ac-beed-3e514a42c511" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/삼성/5201-컨테이너운반.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/삼성/5202-화물도크.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/삼성/5203-베이비진게임.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/삼성/5203-베이비진게임.py" beforeDir="false" afterPath="$PROJECT_DIR$/삼성/5203-베이비진게임.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -311,7 +309,7 @@
       <workItem from="1569080652416" duration="3184000" />
       <workItem from="1569086684554" duration="679000" />
       <workItem from="1572168457192" duration="6374000" />
-      <workItem from="1573046508257" duration="5486000" />
+      <workItem from="1573046508257" duration="6432000" />
     </task>
     <task id="LOCAL-00001" summary=".">
       <created>1573046782220</created>
@@ -320,7 +318,14 @@
       <option name="project" value="LOCAL" />
       <updated>1573046782220</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary=".">
+      <created>1573052749167</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1573052749167</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -388,23 +393,23 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/삼성/5203-베이비진게임.py</url>
-          <line>15</line>
-          <option name="timeStamp" value="43" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/삼성/5203-베이비진게임.py</url>
-          <line>23</line>
-          <option name="timeStamp" value="44" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/삼성/5203-베이비진게임.py</url>
           <line>1</line>
           <option name="timeStamp" value="47" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/삼성/5203-베이비진게임.py</url>
+          <line>30</line>
+          <option name="timeStamp" value="49" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/삼성/5203-베이비진게임.py</url>
           <line>9</line>
-          <option name="timeStamp" value="48" />
+          <option name="timeStamp" value="50" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/삼성/5203-베이비진게임.py</url>
+          <line>32</line>
+          <option name="timeStamp" value="51" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -413,7 +418,7 @@
     <SUITE FILE_PATH="coverage/problem_solving$5208_2.coverage" NAME="5208-전기버스2 Coverage Results" MODIFIED="1572168597272" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/삼성" />
     <SUITE FILE_PATH="coverage/problem_solving$5188_.coverage" NAME="5188-최소합 Coverage Results" MODIFIED="1572172104830" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/삼성" />
     <SUITE FILE_PATH="coverage/problem_solving$10828_.coverage" NAME="10828-스택 Coverage Results" MODIFIED="1569080783389" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/baekjoon" />
-    <SUITE FILE_PATH="coverage/problem_solving$5203_.coverage" NAME="5203-베이비진게임 Coverage Results" MODIFIED="1573052687963" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/삼성" />
+    <SUITE FILE_PATH="coverage/problem_solving$5203_.coverage" NAME="5203-베이비진게임 Coverage Results" MODIFIED="1573097981486" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/삼성" />
     <SUITE FILE_PATH="coverage/problem_solving$5252_.coverage" NAME="5252-공통단어검색 Coverage Results" MODIFIED="1573047194563" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/삼성" />
     <SUITE FILE_PATH="coverage/problem_solving$5202_.coverage" NAME="5202-화물도크 Coverage Results" MODIFIED="1573050314366" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/삼성" />
     <SUITE FILE_PATH="coverage/problem_solving$5201_.coverage" NAME="5201-컨테이너운반 Coverage Results" MODIFIED="1573048950115" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/삼성" />
