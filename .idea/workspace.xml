@@ -2,20 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7c906bd4-9302-47ac-beed-3e514a42c511" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DS,ALGORITHM/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DS,ALGORITHM/trie.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/삼성/5255-타일붙이기.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/카카오/2019 하반기 인턴/2019 하반기 인턴 코테1.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/카카오/2019 하반기 인턴/2019 하반기 인턴 코테2.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/카카오/2019 하반기 인턴/2019 하반기 인턴 코테3.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/카카오/2019 하반기 인턴/2019 하반기 인턴 코테4.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/카카오/2019 하반기 인턴/2019 하반기 인턴 코테5.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/카카오/2019 하반기 인턴/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/problem_solving.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/problem_solving.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/baekjoon/16570-앞뒤가맞는수열.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.vscode/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/.vscode/settings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/카카오/2019 하반기 인턴/2019 하반기 인턴 코테3.py" beforeDir="false" afterPath="$PROJECT_DIR$/카카오/2019 하반기 인턴/2019 하반기 인턴 코테3.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -88,8 +77,8 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.2019 하반기 인턴 코테4">
-    <configuration name="카펫" type="PythonConfigurationType" factoryName="Python" temporary="true">
+  <component name="RunManager" selected="Python.16570-앞뒤가맞는수열">
+    <configuration name="16570-앞뒤가맞는수열" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="problem_solving" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -97,34 +86,12 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/programmers" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/baekjoon" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/programmers/카펫.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="2019 하반기 인턴 코테1" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="problem_solving" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/카카오/2019 하반기 인턴" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/카카오/2019 하반기 인턴/2019 하반기 인턴 코테1.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/baekjoon/16570-앞뒤가맞는수열.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -267,11 +234,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.16570-앞뒤가맞는수열" />
+        <item itemvalue="Python.2019 하반기 인턴 코테3" />
         <item itemvalue="Python.2019 하반기 인턴 코테4" />
         <item itemvalue="Python.2019 하반기 인턴 코테5" />
-        <item itemvalue="Python.2019 하반기 인턴 코테3" />
         <item itemvalue="Python.2019 하반기 인턴 코테2" />
-        <item itemvalue="Python.2019 하반기 인턴 코테1" />
       </list>
     </recent_temporary>
   </component>
@@ -299,6 +266,9 @@
       <workItem from="1573230269934" duration="61000" />
       <workItem from="1573230436294" duration="52000" />
       <workItem from="1573230488703" duration="24937000" />
+      <workItem from="1573290721476" duration="443000" />
+      <workItem from="1573292331523" duration="794000" />
+      <workItem from="1574350261319" duration="3422000" />
     </task>
     <task id="LOCAL-00001" summary=".">
       <created>1573046782220</created>
@@ -328,7 +298,14 @@
       <option name="project" value="LOCAL" />
       <updated>1573197157287</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary=".">
+      <created>1573290744925</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1573290744925</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -459,6 +436,16 @@
           <line>9</line>
           <option name="timeStamp" value="72" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/baekjoon/16570-앞뒤가맞는수열.py</url>
+          <line>11</line>
+          <option name="timeStamp" value="73" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/baekjoon/16570-앞뒤가맞는수열.py</url>
+          <line>16</line>
+          <option name="timeStamp" value="74" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
     <watches-manager>
@@ -473,11 +460,12 @@
     <SUITE FILE_PATH="coverage/problem_solving$5255_.coverage" NAME="5255-타일붙이기 Coverage Results" MODIFIED="1573275131264" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/삼성" />
     <SUITE FILE_PATH="coverage/problem_solving$2019___5.coverage" NAME="2019 하반기 인턴 코테5 Coverage Results" MODIFIED="1573290218382" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/카카오/2019 하반기 인턴" />
     <SUITE FILE_PATH="coverage/problem_solving$5188_.coverage" NAME="5188-최소합 Coverage Results" MODIFIED="1572172104830" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/삼성" />
+    <SUITE FILE_PATH="coverage/problem_solving$16570_.coverage" NAME="16570-앞뒤가맞는수열 Coverage Results" MODIFIED="1574352398253" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/baekjoon" />
     <SUITE FILE_PATH="coverage/problem_solving$2019___2.coverage" NAME="2019 하반기 인턴 코테2 Coverage Results" MODIFIED="1573277927280" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/카카오/2019 하반기 인턴" />
     <SUITE FILE_PATH="coverage/problem_solving$10828_.coverage" NAME="10828-스택 Coverage Results" MODIFIED="1569080783389" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/baekjoon" />
     <SUITE FILE_PATH="coverage/problem_solving$5207_.coverage" NAME="5207-이진탐색 Coverage Results" MODIFIED="1573205725997" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/삼성" />
     <SUITE FILE_PATH="coverage/problem_solving$5201_.coverage" NAME="5201-컨테이너운반 Coverage Results" MODIFIED="1573048950115" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/삼성" />
-    <SUITE FILE_PATH="coverage/problem_solving$2019___3.coverage" NAME="2019 하반기 인턴 코테3 Coverage Results" MODIFIED="1573284955295" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/카카오/2019 하반기 인턴" />
+    <SUITE FILE_PATH="coverage/problem_solving$2019___3.coverage" NAME="2019 하반기 인턴 코테3 Coverage Results" MODIFIED="1573292402265" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/카카오/2019 하반기 인턴" />
     <SUITE FILE_PATH="coverage/problem_solving$W____5___2.coverage" NAME="W 문제해결 구현] 5일차 - 전기버스2 Coverage Results" MODIFIED="1569081255221" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/삼성/5208. [파이썬 S" />
     <SUITE FILE_PATH="coverage/problem_solving$5247_.coverage" NAME="5247-연산 Coverage Results" MODIFIED="1573266373666" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/삼성" />
     <SUITE FILE_PATH="coverage/problem_solving$5202_.coverage" NAME="5202-화물도크 Coverage Results" MODIFIED="1573050314366" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/삼성" />

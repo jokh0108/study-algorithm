@@ -47,7 +47,6 @@ def solution(user_id, banned_id):
             answer += 1
     return answer
 
-print(a)
 a = solution(["frodo", "fradi", "crodo", "abc123", "frodoc"], ["*****", "******"])
 print(a)
 a = solution(["frodo", "frodi"], ["*****", "*****"])
