@@ -1,0 +1,1273 @@
+var goorm_editor = {
+	'editors': {},
+	'session': {},
+	'socket': null,
+	'data': {
+		'pairing': {}
+	},
+	'saved_quiz_list': {},
+
+	'run_terminal': null,
+	
+	'load': function(options) {
+		this.lecture_index = $('[name="dashboard_lecture_index_input"]').val();
+		this.lesson_index = $('[name="dashboard_lesson_index_input"]').val();
+		this.exam_index = $('[name="dashboard_exam_index_input"]').val();
+		
+		if (options && options.socket) {
+			this.socket = options.socket;
+		}
+
+		this.create();
+		this.set_session();
+		this.init_event();
+		this.resize();
+
+		this.setup();
+	},
+
+	get_random_string: function(bits) {
+		var chars, rand, i, ret;
+
+		chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzabcdefghijkl';
+		ret = '';
+
+		while (bits > 0) {
+			// 32-bit integer
+			rand = Math.floor(Math.random() * 0x100000000);
+			// base 64 means 6 bits per character, so we use the top 30 bits from rand to give 30/6=5 characters.
+			for (i = 26; i > 0 && bits > 0; i -= 6, bits -= 6) {
+				ret += chars[0x3F & rand >>> i];
+			}
+		}
+
+		return ret;
+	},
+
+	set_session: function() {
+		this.session.id = this.get_random_string(54);
+	},
+
+	create: function() {
+		var self = this;
+
+		var tab_id = 0;
+
+		// make tab
+		$('goorm-tabs').each(function(i, e) {
+			var ul = $("<ul class='nav nav-tabs edu_tabs' role='tablist'>");
+			$(e).find('.goorm-editor').wrapAll('<div class="tab-content">').each(function(j, l) {
+				var id = "edu_tab_" + (tab_id++);
+				var name = ($(this).attr("goorm-tab")) ? $(this).attr("goorm-tab") : $(this).attr("src");
+				var wrapper = $('<div id="' + id + '" class="tab-pane"> role="tabpanel"');
+
+				if (j === 0) {
+					wrapper.addClass("active");
+					ul.append("<li class='active'><a href='#" + id + "' data-toggle='tab' role='tab'>" + name + "</a></li>");
+				} else {
+					ul.append("<li><a href='#" + id + "'  data-toggle='tab' role='tab'>" + name + "</a></li>");
+				}
+
+				$(this).wrap(wrapper);
+			});
+
+			$(this).prepend(ul);
+
+			if ($(this).attr('tab_run') === "true") {
+				$(this).append('<div class="toolbar_button btn-group" style="width: 100%; margin-top: 20px;"><button class="btn btn-default quiz_run pull-right">' + main_localization.get_value('run') + '</button><button class="btn btn-default pull-right quiz_clear" style="float: right;" type="button">' + main_localization.get_value('initialize') + '</button></div>');
+			}
+
+			// refresh CodeMirror after tabs are drawn
+			$(e).ready(function() {
+				var $ge = $(e).find("goorm-editor");
+				if ($ge.length > 0) {
+					self.editors[self.get_editor_id($ge[0])].refresh();
+				}
+			});
+
+			$(".nav-tabs li a", this).click(function(e) {
+				var editor_id = ($(this).attr('href')) ? $(this).attr('href').substring(1) : "";
+
+				$(this).tab('show');
+
+				if (self.editors[editor_id]) {
+					self.editors[editor_id].refresh();
+				}
+
+				e.preventDefault();
+			});
+		});
+
+		// make editor
+		$('goorm-editor').each(function() {
+			var ge = $(this);
+			var no_tab = ge.attr('no-tab') || false;
+			var lang_mode = ge.attr('lang_mode') || ge.attr('lang') || "text/x-csrc";
+			var theme = ge.attr('theme') || "default";
+			var contents = ge.text() || self.get_default_template(lang_mode);
+
+			if (no_tab) {
+				ge.attr('id', self.get_random_string(54));
+			}
+
+			if (theme !== "default" && $('head').find('link[theme="' + theme + '"]').length === 0) {
+				$("<link>").attr("rel", "stylesheet").attr("type", "text/css").attr("href", "/libs/codemirror/theme/" + theme + ".css").appendTo("head");
+			}
+
+			ge.html('<textarea></textarea>');
+
+			var editor = CodeMirror.fromTextArea(ge.find('textarea').get(0), {
+				gutters: ["CodeMirror-linenumbers", "fold"],
+				foldGutter: {
+					gutter: "fold"
+				},
+				lineNumbers: true,
+				wordWrap: true,
+				lineWrapping: true,
+				styleActiveLine: true,
+				matchBrackets: true,
+				tabSize: 2
+			});
+
+			editor.setOption("mode", lang_mode);
+			//Lazy Loading
+			if (typeof define == "function" && define.amd) {
+				CodeMirror.modeURL = 'codemirror/mode/%N/%N';
+			} else {
+				CodeMirror.modeURL = '/libs/codemirror/mode/%N/%N.js';
+			}
+			CodeMirror.autoLoadMode(editor, CodeMirror.findModeByMIME(data_lang).mode);
+			
+			editor.setOption("theme", theme);
+
+			editor.setValue(contents);
+
+			self.editors[self.get_editor_id(ge)] = editor;
+		});
+		
+		// make runner
+		$('pre').each(function() {
+			var ge = $(this);
+	
+			var data_lang = ge.attr('data-lang') || "text/x-csrc";
+			var data_app = ge.attr('data-app');
+			var data_run = ge.attr('data-run') === 'true' ? true : false;
+			var data_linenumber = (ge.attr('data-linenumber') === 'true' ? true : false);
+			var contents = ge.text();
+
+			if (data_run) {
+				$(this).wrapAll('<goorm-runner class="goorm-runner">').before('<pre class="cm-s-solarized cm-s-light cm-wrapper"><div class="goorm-runner-btns"><button type="button" class="btn btn-sm btn-default code-runner"><i class="fa fa-play"></i></button></div><textarea></textarea></pre>').after('<div class="goorm-runner-terminal"><div class="terminal_wrap code_font">' + main_localization.get_value('check_execute_result') + '</div></div>');
+			} else {
+				$(this).wrapAll('<goorm-runner class="goorm-runner">').before('<pre class="cm-s-solarized cm-s-light cm-wrapper"><textarea></textarea></pre>');
+			}
+			
+			if (data_linenumber) {
+				$(this).parent().find('pre.cm-wrapper').addClass('cm-linenumber-visible');
+			} else {
+				$(this).parent().find('pre.cm-wrapper').addClass('cm-linenumber-invisible');
+			}
+
+			var editor = CodeMirror.fromTextArea(ge.parent().find('textarea').get(0), {
+				foldGutter: {
+					gutter: "fold"
+				},
+				value: contents,
+				lineNumbers: data_linenumber,
+				wordWrap: true,
+				lineWrapping: true,
+				styleActiveLine: true,
+				matchBrackets: true,
+				tabSize: 2,
+				readOnly: 'nocursor'
+			});
+
+			editor.setOption("mode", data_lang);
+			//Lazy Loading
+			if (typeof define == "function" && define.amd) {
+				CodeMirror.modeURL = 'codemirror/mode/%N/%N';
+			} else {
+				CodeMirror.modeURL = '/libs/codemirror/mode/%N/%N.js';
+			}
+			CodeMirror.autoLoadMode(editor, CodeMirror.findModeByMIME(data_lang).mode);
+			
+			editor.setValue(contents);
+			editor.setSize(null,'100%');
+		});
+		
+		var href = "/libs/codemirror/theme/solarized.css";
+		if ($('head').find('link[href="' + href + '"]').length === 0) {
+			$("<link>").attr("rel", "stylesheet").attr("type", "text/css").attr("href", href).appendTo("head");
+		}
+	},
+
+	get_default_template: function(lang_mode) {
+		if (lang_mode === "text/x-csrc") {
+			return "#include <stdio.h>\r\rint main() {\r\r  return 0;\r}";
+		} else if (lang_mode === "text/x-c++src") {
+			return "#include <iostream>\r\rusing namespace std;\r\rint main() {\r\r  return 0;\r}";
+		} else if (lang_mode === "text/x-java") {
+			return "class example {\r\r  public static void main(String[] args) {\r\r  }\r}";
+		} else if (lang_mode === "text/x-python") {
+			return "# -*- coding: utf-8 -*-\r# UTF-8 encoding when using korean\r\ra, b, c, d, e = raw_input().split()\r";
+		} else {
+			return "";
+		}
+	},
+
+	init_event: function() {
+		var self = this;
+
+		$(window).resize(function() {
+			self.resize();
+		});
+
+		// send_correct - remember_me checkbox
+		$(window).on('load', function() {
+			if ($(".goorm-send-correct-tab").length > 0) {
+				self.attach_remember_me();
+			}
+		});
+
+
+		this.init_click_event();
+		this.init_mouse_event();
+	},
+
+	init_click_event: function() {
+		var self = this;
+
+		$(document).on('click', '.quiz_submit', function() {
+			var tab = $(this).parents('.goorm-quiz-tab');
+
+			/**
+			 *  QUIZ PROGRAMMING
+			 */
+			tab.find('goorm-editor[form="programming"]').each(function(i, e) {
+				if ($(e).parent().hasClass('active')) {
+					self.submit_programming(e);
+				}
+			});
+
+			/**
+			 *  QUIZ BLOCKLY
+			 */
+			tab.find('goorm-editor[form="blockly"]').each(function(i, e) {
+				if ($(e).parent().hasClass('active')) {
+					self.submit_blockly(e);
+				}
+			});
+
+			/**
+			 *  QUIZ NORMAL
+			 */
+			tab.find('goorm-quiz').each(function(i, e) {
+				self.submit_normal(e);
+			});
+		});
+
+		$(document).on('click', '.quiz_run', function() {
+			var tab = $(this).parents('.goorm-quiz-tab');
+			var tabs = $(this).parents('goorm-tabs');
+
+			/**
+			 * QUIZ BLOCKLY
+			 */
+			tabs.find('goorm-editor[form="blockly"]').each(function(i, e) {
+				if ($(e).parent().hasClass('active')) {
+					self.run_blockly(e);
+				}
+			});
+
+			/**
+			 *  QUIZ PROGRAMMING
+			 */
+			tabs.find('goorm-editor[form="programming"]').each(function(i, e) {
+				if ($(e).parent().hasClass('active')) {
+					self.submit_programming(e, true);
+				}
+			});
+		});
+
+		$(document).on('click', '.quiz_clear', function() {
+			var editor = $(this).parents('goorm-tabs').find('.tab-pane.active goorm-editor');
+
+			if (editor.attr('form') === 'blockly') {
+				goorm_blockly.discard(editor);
+			} else {
+				self.editors[self.get_editor_id(editor)].setValue(self.get_default_template(editor.attr('lang_mode') || editor.attr('lang') || "text/x-csrc"));
+			}
+		});
+
+		$(document).on('click', '.code-runner', function() {
+			var tab = $(this).parents('goorm-runner');
+			var pre = tab.find('pre:last');
+			
+			// if (self.run_terminal) {
+			// 	self.run_terminal.destroy();
+			// 	self.run_terminal = null;
+			// }
+			
+			var source = pre.text();
+			var filetype = pre.attr('data-app');
+			var options = pre.attr('data-options');
+			var main_class_name = 'Main';
+
+			if (options !== undefined) {
+				options = JSON.parse(atob(options));
+				if (options.main_class === '') {
+					options.main_class = main_class_name;
+				}
+			} else {
+				options = {
+					main_class: main_class_name
+				};
+			}
+
+			self.run_terminal = new goorm_terminal({
+				socket: self.socket
+			});
+			
+			// if (tab.find('.goorm-runner-terminal').length === 0) {
+			// 	tab.append('<div class="goorm-runner-terminal"><div class="terminal">' + main_localization.get_value('check_execute_result') + '</div></div>');
+			// }
+			
+			self.run_terminal.load(tab.find('.terminal_wrap'), {
+				'id': self.session.id,
+				'source': source,
+				'filetype': filetype,
+				'main_class': options.main_class
+			}, {
+				'error': function(data) {
+					if (tab.find('.terminal').length > 0) {
+						tab.find('.terminal').empty().append(data.err_msg.split('\n').join('<br />'));
+					}
+				}
+			});
+		});
+		
+		/**
+		 *  QUIZ NORMAL / PAIRING
+		 */
+		$(document).on('click', '.quiz_pairing_clear', function() {
+			var quiz = $(this).parents('goorm-quiz');
+
+			delete self.data.pairing[quiz.attr('quiz_index')];
+
+			var canvas = quiz.find('.pairing_canvas').get(0);
+			canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+
+			var quiz_select =  $('.normal_quiz_select[index="'+quiz.attr('quiz_index')+'"]');
+			if (quiz_select.find('span.label').hasClass('label-default')) {
+				quiz_select.removeClass('editted');
+			}
+			// if (typeof localStorage !== 'undefined') {
+			// 	localStorage.setItem('user_answer_' + user_id + '@' + self.exam_index + '@' + quiz.attr('quiz_index'), '');
+			// }
+			var last_answer_container = quiz.find('.last_answer');
+			var answer = '[]';
+			if (typeof localStorage !== 'undefined' && last_answer_container.length) {
+				var last_answer = localStorage.getItem('user_answer_' + user_id + '@' + self.exam_index + '@' + quiz.attr('quiz_index'));
+				self.saved_quiz_list[quiz.attr('quiz_index')] = last_answer === answer;
+
+				if (last_answer && answer !== last_answer && /\[LAST_ANSWER\]/.test(last_answer_container.text())) {
+					last_answer = JSON.parse(last_answer);
+					last_answer = last_answer.map(function(pair) {
+						return pair.left + ' - ' + pair.right;
+					}).join(', ');
+
+					last_answer_container.text(last_answer_container.text().replace(/\[LAST_ANSWER\]/, last_answer));
+					last_answer_container.parent().show();
+				}
+			}
+		});
+
+		/**
+		 *  SEND CORRECT TO TARGET EMAIL
+		 */
+		var can_send = true;
+		$(document).on('click', '.quiz_send_correct', function() {
+			if (!can_send) {
+				return false;
+			} else {
+				can_send = false;
+				$('.quiz_send_correct').css('opacity', '0.65');
+			}
+			
+			var send_info = null;
+			var name = $("#send_correct_name").val();
+			var from = $("#send_correct_from_email").val();
+			var to = $("#send_correct_to_email").val(),
+				chapter = $('.lesson_title').html().trim();
+
+			if ($("#remember_me").is(":checked")) {
+				send_info = {
+					name: name,
+					from: from,
+					to: to
+				};
+
+				localStorage.setItem('send_info', JSON.stringify(send_info));
+			} else {
+				localStorage.removeItem('send_info');
+			}
+
+			if ($('#send_answer').is(':checked')) {
+				var host = "";
+				if (document.location.href.indexOf('gilbut') > -1) {
+					host = 'gilbut.goorm.io';
+				}
+
+				var tabs = $('[quiz_index]');
+				var quizzes = [];
+
+				if (tabs && tabs.length > 0) {
+					for (var i = 0; i < tabs.length; i++) {
+						var tab = tabs[i];
+
+						if ($(tabs[i]).hasClass('goorm-code')) {
+							quizzes.push(self.get_programming_data(tab));
+						} else {
+							quizzes.push(self.get_normal_data(tab));
+						}
+					}
+				}
+
+				widgets.loader.show(main_localization.get_value('send_mail'));
+				
+				$.post('/submit_quiz/send_correct', {
+					'id': self.session.id,
+					'quizzes': quizzes,
+					'name': name,
+					'from': from,
+					'to': to,
+					'question': $("#send_correct_question").val(),
+					'lecture_index': self.lecture_index,
+					'lesson_index': self.lesson_index,
+					'host': host,
+					'chapter': chapter
+				}, function(result) {
+					widgets.loader.hide();
+					
+					if (result) {
+						$('#quiz_send_correct_modal').modal('hide');
+						
+						notice(main_localization.get_value('toast_mark_correct'));
+					} else {
+						notice(main_localization.get_value('toast_mark_incorrect'));
+					}
+					
+					can_send = true;
+					$('.quiz_send_correct').css('opacity', '1');
+				});
+			} else {
+				widgets.loader.show(main_localization.get_value('send_mail'));
+				
+				$.post('/submit_quiz/send_correct', {
+					'name': name,
+					'from': from,
+					'to': to,
+					'question': $("#send_correct_question").val().length ? $("#send_correct_question").val() : main_localization.get_value('none'),
+					'chapter': chapter
+				}, function(result) {
+					widgets.loader.hide();
+					
+					if (result) {
+						$('#quiz_send_correct_modal').modal('hide');
+						
+						notice(main_localization.get_value('toast_question_success'));
+					} else {
+						notice(main_localization.get_value('toast_question_fail'));
+					}
+					
+					can_send = true;
+					$('.quiz_send_correct').css('opacity', '1');
+				});
+			}
+		});
+
+		$(document).on('click', '.true_false_choices_area .btn-quiz_select.active', function() {
+			$(this).removeClass('active').parents('.true_false_choices_area').find('input[type=radio]').prop('checked', false);
+			return false;
+		});
+	},
+
+	init_mouse_event: function() {
+		var self = this;
+
+		/**
+		 *  QUIZ NORMAL / PAIRING
+		 */
+		var moving = false;
+		var quiz = null;
+		var from = null;
+		var to = null;
+		var data = this.data.pairing;
+		var is_mobile = /mobile/i.test(navigator.userAgent) || /android/i.test(navigator.userAgent);
+
+		if (is_mobile) {
+			var mousedown_event = $.debounce(250, function(e) {
+				moving = true;
+				quiz = $(this).parents('goorm-quiz');
+
+				if ($(this).attr('direction') === 'left') {
+					var checkbox = $(this).find('input[type="checkbox"]');
+
+					if (!checkbox.is(':checked')) {
+						from = $(this);
+					}
+					else {
+						from = null;
+					}
+				}
+				else { // right
+					var checkbox = $(this).find('input[type="checkbox"]');
+
+					if (!checkbox.is(':checked')) {
+						to = $(this);
+					}
+					else {
+						to = null;
+					}
+				}
+
+				if (from && to) {
+					var left = from;
+					var right = to;
+
+					var quiz_data = data[quiz.attr('quiz_index')];
+					if (!quiz_data) {
+						data[quiz.attr('quiz_index')] = {
+							'answer': []
+						};
+					}
+
+					if (data[quiz.attr('quiz_index')].answer.length === 0 || (data[quiz.attr('quiz_index')].answer.length > 0 && !data[quiz.attr('quiz_index')].answer.some(function(o) {
+							return ((o.left == left.attr('value')) && (o.right == right.attr('value')));
+						}))) {
+						data[quiz.attr('quiz_index')].answer.push({
+							'left': left.attr('value'),
+							'right': right.attr('value')
+						});
+					}
+
+					self.reset(quiz.find('.pairing_canvas').get(0));
+
+					// clear
+					$('.pairing_choice_item input[type="checkbox"]').prop('checked', false);
+
+					from = null;
+					to = null;
+				}
+			});
+
+			$(document).on('mousedown', '.pairing_choice_item', mousedown_event);
+			$(document).on('touchstart', '.pairing_choice_item', mousedown_event);
+
+			var mouseup_event =  $.debounce(250, function(e) {
+				$(this).parent().find('input[type="checkbox"]').prop('checked', false);
+			});
+			
+			$(document).on('mouseup', '.pairing_choice_item', mouseup_event);
+			$(document).on('touchend', '.pairing_choice_item', mouseup_event);
+
+			var pairing_choice_item = $('.pairing_choice_item');
+
+			if (pairing_choice_item.length > 0) {
+				pairing_choice_item.find('div').html('<input type="checkbox" />');
+			}
+		} else {
+			$(document).on('mousedown', '.pairing_choice_item', function(e) {
+				moving = true;
+				quiz = $(this).parents('goorm-quiz');
+				from = $(this);
+			});
+
+			$(document).on('mouseup', '.pairing_choice_item', function() {
+				if (quiz) {
+					moving = false;
+
+					to = $(this);
+
+					var quiz_data = data[quiz.attr('quiz_index')];
+					if (!quiz_data) {
+						data[quiz.attr('quiz_index')] = {
+							'answer': []
+						};
+					}
+
+					var left = null;
+					var right = null;
+
+					if (from && to) {
+						if (from.attr('direction') === 'left' && to.attr('direction') === 'right') {
+							left = from;
+							right = to;
+						} else if (from.attr('direction') === 'right' && to.attr('direction') === 'left') {
+							left = to;
+							right = from;
+						}
+					}
+
+					if (left && right) {
+						if (data[quiz.attr('quiz_index')].answer.length === 0 || (data[quiz.attr('quiz_index')].answer.length > 0 && !data[quiz.attr('quiz_index')].answer.some(function(o) {
+								return ((o.left == left.attr('value')) && (o.right == right.attr('value')));
+							}))) {
+							if (data[quiz.attr('quiz_index')].answer.length === 0) {
+								$('.normal_quiz_select[index="' + quiz.attr('quiz_index') + '"]').addClass('editted');
+							}
+							data[quiz.attr('quiz_index')].answer.push({
+								'left': left.attr('value'),
+								'right': right.attr('value')
+							});
+							// if (typeof localStorage !== 'undefined' && self.exam_index) {
+							// 	localStorage.setItem('user_answer_' + user_id + '@' + self.exam_index + '@' + quiz.attr('quiz_index'), JSON.stringify(data[quiz.attr('quiz_index')].answer));
+							// }
+
+							var last_answer_container = quiz.find('.last_answer');
+							var answer = JSON.stringify(data[quiz.attr('quiz_index')].answer);
+							if (typeof localStorage !== 'undefined' && answer && last_answer_container.length) {
+								var last_answer = localStorage.getItem('user_answer_' + user_id + '@' + self.exam_index + '@' + quiz.attr('quiz_index'));
+								self.saved_quiz_list[quiz.attr('quiz_index')] = last_answer === answer;
+
+								if (last_answer && answer !== last_answer && /\[LAST_ANSWER\]/.test(last_answer_container.text())) {
+									last_answer = JSON.parse(last_answer);
+									last_answer = last_answer.map(function(pair) {
+										return pair.left + ' - ' + pair.right;
+									}).join(', ');
+
+									last_answer_container.text(last_answer_container.text().replace(/\[LAST_ANSWER\]/, last_answer));
+									last_answer_container.parent().show();
+								}
+							}
+						}
+					}
+
+					self.reset(quiz.find('.pairing_canvas').get(0));
+				}
+			});
+
+			$(document).on('mousemove', '.pairing_canvas', function(e) {
+				if (moving && quiz) {
+					var canvas = quiz.find('canvas').get(0);
+					var ctx = canvas.getContext('2d');
+
+					var canvas_offset = $(canvas).offset();
+
+					self.reset(canvas);
+
+					$.extend(true, ctx, {
+						strokeStyle: "#7b68ee",
+						lineWidth: 4.5,
+						lineCap: 'round',
+						lineJoin: "round"
+					});
+
+					ctx.beginPath();
+					ctx.moveTo(0, from.offset().top - canvas_offset.top + 23);
+					ctx.lineTo(e.offsetX, e.offsetY);
+					ctx.closePath();
+					ctx.stroke();
+				}
+			});
+
+			$(document).on('mouseup', '.pairing_canvas', function() {
+
+				self.reset(this);
+
+				moving = false;
+				quiz = null;
+				from = null;
+				to = null;
+			});
+
+			document.mouseup = function() {
+				self.reset();
+
+				moving = false;
+				quiz = null;
+				from = null;
+				to = null;
+			};
+		}
+	},
+
+	get_editor_id: function(e) {
+		e = $(e);
+
+		return (e.attr('no-tab')) ? e.attr('id') : e.parent().attr('id');
+	},
+
+	run_blockly: function(e) {
+		var blockly = goorm_blockly.get(e);
+
+		if (blockly) {
+			eval(blockly.JavaScript.workspaceToCode());
+
+			$(this).trigger('run_blockly_complete');
+		}
+	},
+
+	get_programming_data: function(e) {
+		return {
+			'quiz_index': $(e).attr('quiz_index'),
+			'type': $(e).attr('filetype'),
+			'answer': '<br/>' + this.editors[this.get_editor_id($(e))].getValue().replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;').replace(/\n/g, '<br/>').replace(/ /g, '&nbsp;')
+		};
+	},
+
+	submit_programming: function(e, only_execute) {
+		var self = this;
+
+		var quiz = $(e);
+		var goorm_tabs = quiz.parents('goorm-tabs');
+		var stdout_container = goorm_tabs.find('.goorm-stdout-container');
+
+		var editor_id = this.get_editor_id(quiz);
+
+		var tab = $('a[href="#' + editor_id + '"]');
+		var editor = this.editors[editor_id];
+
+		if (editor) {
+			$.post('/submit_quiz/programming', {
+				'id': self.session.id,
+				'lecture_index': self.lecture_index,
+				'lesson_index': self.lesson_index,
+				'quiz_index': quiz.attr('exam').split('/')[1],
+				'source': editor.getValue(),
+				'filetype': quiz.attr('filetype')
+			}, function(data) {
+				if (data.result) {
+					if (!only_execute) {
+						tab.find('span').remove();
+						goorm_tabs.find('div.message').remove();
+
+						if (data.submit_mode) {
+							tab.prepend('<span class="glyphicon glyphicon-ok" style="margin-right: 5px; color: green"></span>');
+							stdout_container.after('<div class="message well well-sm margin-0px" style="text-align: right;">' + main_localization.get_value('toast_submit_success') + '</div>');
+						} else if (data.solved) {
+							tab.prepend('<span class="glyphicon glyphicon-ok" style="margin-right: 5px; color: green"></span>');
+							stdout_container.after('<div class="message well well-sm margin-0px" style="text-align: right;">' + main_localization.get_value('toast_mark_correct_success') + '</div>');
+						} else {
+							tab.prepend('<span class="glyphicon glyphicon-remove" style="margin-right: 5px; color: red"></span>');
+							stdout_container.after('<div class="message well well-sm margin-0px" style="text-align: right;">' + toast_mark_correct_fail + '</div>');
+						}
+					}
+
+					if (!data.stdout.length || (data.stdout.length === 1 && data.stdout[0] === "")) {
+						data.stdout = [main_localization.get_value('no_output')];
+					}
+
+					stdout_container.html(data.stdout.join('\n').replace(/ /g, ' ').replace(/\r\n/g, '<br/>').replace(/\r/g, '<br />').replace(/\n/g, '<br />'));
+				} else {
+					switch (data.err_type) {
+						case 'compile_err':
+							notice(main_localization.get_value('toast_compile_fail'));
+							break;
+						case 'run_err':
+							notice(main_localization.get_value('toast_run_fail'));
+							break;
+						case 'mark_err':
+							notice(main_localization.get_value('toast_mark_fail'));
+							break;
+						case 'submit_err':
+							notice(main_localization.get_value('toast_submit_fail'));
+						default:
+							notice(main_localization.get_value('toast_mark_fail'));
+							break;
+					}
+				}
+			});
+		}
+	},
+
+	submit_blockly: function(e) {
+		var self = this;
+
+		var quiz = $(e);
+		var stdout_container = $(e).parents('goorm-tabs').find('.goorm-stdout-container');
+
+		var tab = $('a[href="#' + this.get_editor_id(quiz) + '"]');
+		var blockly = goorm_blockly.get(e);
+
+		if (quiz.attr('exam')) {
+			$.post('/submit_quiz/programming', {
+				'id': self.session.id,
+				'quiz_index': quiz.attr('exam').split('/')[1],
+				'source': blockly.Python.workspaceToCode(),
+				'filetype': 'py'
+			}, function(data) {
+				if (data.result) {
+					tab.find('span').remove();
+
+					if (data.solved) {
+						tab.prepend('<span class="glyphicon glyphicon-ok" style="margin-right: 5px; color: green"></span>');
+					} else {
+						tab.prepend('<span class="glyphicon glyphicon-remove" style="margin-right: 5px; color: red"></span>');
+
+						stdout_container.html(data.stdout.join('\n').replace(/ /g, ' ').replace(/\r\n/g, '<br/>').replace(/\r/g, '<br />').replace(/\n/g, '<br />'));
+					}
+				} else {
+					switch (data.err_type) {
+						case 'compile_err':
+							notice(main_localization.get_value('toast_compile_fail'));
+							break;
+						case 'run_err':
+							notice(main_localization.get_value('toast_run_fail'));
+							break;
+						case 'mark_err':
+							notice(main_localization.get_value('toast_mark_fail'));
+							break;
+						default:
+							notice(main_localization.get_value('toast_mark_fail'));
+							break;
+					}
+				}
+			});
+		}
+	},
+
+	get_normal_data: function(e) {
+		var quiz = $(e);
+		var type = quiz.attr('quiz_type') || quiz.find('.goorm-answer-wrapper').attr('type');
+
+		var answer = null;
+		var submit_file = null;
+		
+		if (type === 'short_answer') {
+			answer = [];
+
+			quiz.find('.goorm-answer-input').map(function (i, e) {
+				answer.push($(e).val());
+			});
+
+			answer = JSON.stringify(answer);
+		} else if (type === 'true_false') {
+			answer = quiz.find('.active input').val() || "";
+		} else if (type === 'multiple_choice') {
+			answer = [];
+ 			
+ 			$('.active input[name="quiz_normal_multiple_choice_answer"]').map(function(i, obj) {
+ 				answer.push($(obj).val() || '');
+ 			});
+		} else if (type === 'pairing') {
+			answer = (this.data.pairing[quiz.attr('quiz_index')] && JSON.stringify(this.data.pairing[quiz.attr('quiz_index')].answer)) || "[]";
+		} else if (type === 'descriptive') {
+			answer = quiz.find('.goorm-answer-textarea').val();
+		} else if (type === 'file_submit') {
+			submit_file = quiz.find('.goorm-answer-input').eq(0)[0].files[0];
+		}
+		
+		var obj = {
+			'id': this.session.id,
+			'quiz_index': quiz.attr('quiz_index'),
+			'type': type,
+			'lesson_index': this.lesson_index
+		};
+		
+		if (type === 'file_submit') {
+			obj.submit_file = submit_file;
+		} else {
+			obj.answer = answer;
+		}
+		
+		return obj;
+	},
+
+	set_normal_data: function(e, answer) {
+		var wrapper = $(e);
+		var type = wrapper.attr('quiz_type');
+
+		if (type === 'short_answer') {
+// 			quiz.find('.goorm-answer-input').val(answer);
+			answer = this.convert_array(answer);
+			
+			wrapper.find('.goorm-answer-input').map(function (i, e) {
+				$(e).val(answer[i]);
+			});
+		} else if (type === 'true_false') {
+			wrapper.find('[type="radio"]').parent().removeClass('active');
+			wrapper.find('[type="radio"]').prop('checked', false);
+
+			wrapper.find('[type="radio"][value="' + answer + '"]').parent().addClass('active');
+			wrapper.find('[type="radio"][value="' + answer + '"]').prop('checked', true);
+		} else if (type === 'multiple_choice') {
+			wrapper.find('[type="radio"]').parent().removeClass('active');
+			wrapper.find('[type="radio"]').prop('checked', false);
+
+			wrapper.find('[type="radio"][value="' + answer + '"]').parent().addClass('active');
+			wrapper.find('[type="radio"][value="' + answer + '"]').prop('checked', true);
+		} else if (type === 'pairing') {
+			this.data.pairing[wrapper.attr('quiz_index')] = {
+				'answer': JSON.parse(answer)
+			};
+			this.saved_quiz_list[wrapper.attr('quiz_index')] = true;
+		} else if (type === 'descriptive') {
+			wrapper.find('.goorm-answer-textarea').val(answer);
+		} else if (type === 'file_submit') {
+			wrapper.find('.goorm-answer-textarea').val(answer);
+		}
+	},
+
+	set_programming_data: function(e, answer) {
+		if (this.editors[this.get_editor_id($(e))]) {
+			this.editors[this.get_editor_id($(e))].setValue(answer.replace(/<br\/>/g, '\n').replace(/&nbsp;&nbsp;&nbsp;&nbsp;/g, '\t').replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>'));	
+		}
+	},
+
+	submit_normal: function(e) {
+		var self = this;
+		var quiz = $(e);
+		var type = quiz.attr('quiz_type') || quiz.find('.goorm-answer-wrapper').attr('type');
+		
+		if (type === false) {
+			
+		} else if (type === 'file_submit') {
+			var form_data = new FormData();
+			var quiz_data = this.get_normal_data(e);
+
+			form_data.append('id', quiz_data.id);
+			form_data.append('quiz_index', quiz_data.quiz_index);
+			form_data.append('lesson_index', quiz_data.lesson_index);
+			form_data.append('type', quiz_data.type);
+			form_data.append('submit_file', quiz_data.submit_file);
+
+			if (!quiz.find('.goorm-answer-input').eq(0)[0].files[0]) {
+				quiz.append([
+					'<div class="message form-group has-error">',
+						'<p class="form-control" style="color:#a94442">',
+							main_localization.get_value("no_selected_file"),
+							'<i class="fa fa-times" aria-hidden="true" style="float: right;font-size: 17px;"></i>',
+						'</p>',
+					'</div>'
+				].join(''));
+			} else if (quiz.find('.goorm-answer-input').eq(0)[0].files[0].size > 1000 * 1000 * 10) {
+				quiz.append([
+					'<div class="message form-group has-error">',
+						'<p class="form-control" style="color:#a94442">',
+							main_localization.get_value("smart_editor_file_size_limit_msg"),
+							'<i class="fa fa-times" aria-hidden="true" style="float: right;font-size: 17px;"></i>',
+						'</p>',
+					'</div>'
+				].join(''));
+			} else {
+				$.ajax({
+					url: '/submit_quiz/normal/file_submit',
+					type: 'POST',
+					data: form_data,
+					cache: false,
+					contentType: false, // not to add Content-Type header
+					processData: false, // not to convert string
+				}).done(function(solve) {
+					if (solve) {
+						var result = solve.result;
+						var detail = solve.detail || [];
+
+						quiz.find('div.message').remove();
+						if (result) {
+							quiz.append([
+								'<div class="message form-group has-success">',
+									'<p class="form-control" style="color:#3c763d">',
+										main_localization.get_value("toast_submit_success"),
+										'<i class="fa fa-check" aria-hidden="true" style="float: right;font-size: 17px;"></i>',
+									'</p>',
+								'</div>'
+							].join(''));
+						} else {
+							if (detail === 'no_file') {
+								quiz.append([
+									'<div class="message form-group has-error">',
+										'<p class="form-control" style="color:#a94442">',
+											main_localization.get_value("no_selected_file"),
+											'<i class="fa fa-times" aria-hidden="true" style="float: right;font-size: 17px;"></i>',
+										'</p>',
+									'</div>'
+								].join(''));
+							} else if (detail === 'upload_failed') {
+								quiz.append([
+									'<div class="message form-group has-error">',
+										'<p class="form-control" style="color:#a94442">',
+											main_localization.get_value("file_upload_failed"),
+											'<i class="fa fa-times" aria-hidden="true" style="float: right;font-size: 17px;"></i>',
+										'</p>',
+									'</div>'
+								].join(''));
+							} else if (detail === 'not_student') {
+								quiz.append([
+									'<div class="message form-group has-error">',
+										'<p class="form-control" style="color:#a94442">',
+											main_localization.get_value("not_student_not_available_lazy_mark_nomral_quiz"),
+											'<i class="fa fa-times" aria-hidden="true" style="float: right;font-size: 17px;"></i>',
+										'</p>',
+									'</div>'
+								].join(''));
+							} else {
+								quiz.append([
+									'<div class="message form-group has-error">',
+										'<p class="form-control" style="color:#a94442">',
+											main_localization.get_value("toast_mark_correct_fail"),
+											'<i class="fa fa-times" aria-hidden="true" style="float: right;font-size: 17px;"></i>',
+										'</p>',
+									'</div>'
+								].join(''));
+							}
+						}
+
+						if (solve.solved) {
+							$('#curriculumtree .node-checked .ongoing').prepend('<i class="fa fa-check-circle"></i>');
+							self.check_badge();
+						}
+					} else {
+						quiz.append([
+							'<div class="message form-group has-error">',
+								'<p class="form-control" style="color:#a94442">',
+									main_localization.get_value("no_selected_file"),
+									'<i class="fa fa-times" aria-hidden="true" style="float: right;font-size: 17px;"></i>',
+								'</p>',
+							'</div>'
+						].join(''));
+					}
+				});	
+			}
+		} else {
+			$.post('/submit_quiz/normal', this.get_normal_data(e), function(solve) {
+				var result = solve.result;
+				var detail = solve.detail || [];
+				
+				quiz.find('div.message').remove();
+				if (result) {
+					if (detail === 'not_marked') {
+						quiz.append([
+							'<div class="message form-group has-success">',
+								'<p class="form-control" style="color:#3c763d">',
+									main_localization.get_value("toast_submit_success"),
+									'<i class="fa fa-times" aria-hidden="true" style="float: right;font-size: 17px;"></i>',
+								'</p>',
+							'</div>'
+						].join(''));
+					} else {
+						quiz.append([
+							'<div class="message form-group has-success">',
+								'<p class="form-control" style="color:#3c763d">',
+									main_localization.get_value('toast_mark_correct_success'),
+									'<i class="fa fa-check" aria-hidden="true" style="float: right;font-size: 17px;"></i>',
+								'</p>',
+							'</div>'
+						].join(''));
+					}
+				} else {
+					quiz.append([
+						'<div class="message form-group has-error">',
+							'<p class="form-control" style="color:#a94442">',
+								main_localization.get_value('toast_mark_correct_fail'),
+								'<i class="fa fa-times" aria-hidden="true" style="float: right;font-size: 17px;"></i>',
+							'</p>',
+						'</div>'
+					].join(''));
+				}
+
+				if (solve.solved) {
+					$('#curriculumtree .node-checked .ongoing').prepend('<i class="fa fa-check-circle"></i>');
+					self.check_badge();
+				}
+			});
+		}
+	},
+
+	resize: function() {
+		$('.choices_container').map(function(i, container) {
+			var left = $(container).find('.left_choices_container');
+			var right = $(container).find('.right_choices_container');
+
+			$(container).css('height', (left.height() > right.height()) ? left.height() : right.height() + 'px');
+		});
+
+		$('.pairing_canvas').map(function(i, canvas) {
+			var $canvas = $(canvas);
+
+			$(canvas).parent().css('height', '100%');
+
+			canvas.width = $canvas.width();
+			canvas.height = $canvas.height();
+		});
+
+		this.reset();
+	},
+
+	reset: function(canvas) {
+		/**
+		 *  QUIZ NORMAL / PAIRING
+		 */
+		var pairing_data = this.data.pairing;
+
+		if (canvas) { // TARGET CANVAS
+			canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+
+			var quiz = $(canvas).parents('goorm-quiz');
+			var quiz_index = quiz.attr('quiz_index');
+			var quiz_data = pairing_data[quiz_index];
+
+			if (quiz_data && quiz_data.answer.length > 0) {
+				var ctx = canvas.getContext('2d');
+				var canvas_offset = $(canvas).offset();
+
+				$.extend(true, ctx, {
+					strokeStyle: "#7b68ee",
+					lineWidth: 4.5,
+					lineCap: 'round',
+					lineJoin: "round"
+				});
+
+				for (var i = 0; i < quiz_data.answer.length; i++) {
+					var item = quiz_data.answer[i];
+
+					var left = quiz.find('[direction="left"][value="' + item.left + '"]');
+					var right = quiz.find('[direction="right"][value="' + item.right + '"]');
+
+					ctx.beginPath();
+					ctx.moveTo(0, left.offset().top - canvas_offset.top + 23);
+					ctx.lineTo(canvas.width, right.offset().top - canvas_offset.top + 23);
+					ctx.closePath();
+					ctx.stroke();
+				}
+			}
+		} else if (Object.keys(pairing_data).length > 0) { // ALL
+			for (var quiz_index in pairing_data) {
+				var quiz = $('goorm-quiz[quiz_index="' + quiz_index + '"]');
+				var quiz_data = pairing_data[quiz_index];
+
+				var canvas = quiz.find('canvas').get(0);
+				var ctx = canvas.getContext('2d');
+
+				var canvas_offset = $(canvas).offset();
+
+				canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+
+				$.extend(true, ctx, {
+					strokeStyle: "#7b68ee",
+					lineWidth: 4.5,
+					lineCap: 'round',
+					lineJoin: "round"
+				});
+
+				for (var i = 0; i < quiz_data.answer.length; i++) {
+					var item = quiz_data.answer[i];
+
+					var left = quiz.find('[direction="left"][value="' + item.left + '"]');
+					var right = quiz.find('[direction="right"][value="' + item.right + '"]');
+
+					ctx.beginPath();
+					ctx.moveTo(0, left.offset().top - canvas_offset.top + 23);
+					ctx.lineTo(canvas.width, right.offset().top - canvas_offset.top + 23);
+					ctx.closePath();
+					ctx.stroke();
+				}
+			}
+		}
+	},
+
+	set_correct: function(e, correct) {
+		var quiz = $(e);
+
+		quiz.append('<div class="goorm-correct-wrapper">' + main_localization.get_value('correct_answer') + ': ' + correct + '</div>');
+	},
+
+	setup: function() {
+		var self = this;
+
+		/**
+		 *  Correct Page
+		 */
+		// if (true) {
+		if (this.lesson_index) {
+			$('.goorm-send-correct-tab').remove();
+			// $('.quiz_pairing_clear').remove();
+			$('#contents_right_container').hide();
+			$('#contents_left_container').removeClass('col-md-8').addClass('col-md-12');
+
+			$.get('/submit_quiz/get_correct', {
+				'user_id': this.session.id,
+				'lesson_index': this.lesson_index
+			}, function(data) {
+				if (data) {
+					var quizzes = data;
+
+					for (var i = 0; i < quizzes.length; i++) {
+						var quiz_index = quizzes[i].quiz_index;
+
+						var answer = quizzes[i].answer;
+						// var correct = quizzes[i].correct;
+
+						var tab = $('[quiz_index="' + quiz_index + '"]').get(0);
+
+						self.set_normal_data(tab, answer);
+						// self.set_programming_data(tab, answer);
+
+						// if (correct) {
+						// 	self.set_correct(tab, correct);
+						// }
+					}
+
+					self.reset();
+				}
+
+				// $('.quiz_submit').click().remove();
+			});
+		}
+		// } else {
+		// 	$('.goorm-answer-wrapper label.active').removeClass('active');
+			
+		// 	$('#quiz_send_correct_modal').on('hidden.bs.modal', function() {
+		// 		$('#send_correct_question').val("");
+				
+		// 		if (!$("#remember_me").is(':checked')) {
+		// 			$('#send_correct_name').val("");
+		// 			$("#send_correct_from_email").val("");
+		// 			$("#send_correct_to_email").val("");
+		// 		}
+		// 	});
+		// }
+	},
+
+	attach_remember_me: function() {
+		if ($("#remember_me").length === 0) {
+			$(".goorm-send-correct-tab form").append('<div class="form-group"><label class="col-sm-offset-3"><input id="remember_me" type="checkbox" /> ' + main_localization.get_value('remember_email') + '</label></div>');
+		}
+
+		var send_info = localStorage.getItem('send_info');
+		if (send_info) {
+			send_info = JSON.parse(send_info);
+			$("#send_correct_name").val(send_info.name);
+			$("#send_correct_from_email").val(send_info.from);
+			$("#send_correct_to_email").val(send_info.to);
+			$("#remember_me").attr("checked", true);
+		}
+
+		$("#remember_me").on('change', function() {
+			if (!$(this).is(':checked')) {
+				localStorage.removeItem('send_info');
+			}
+		});
+	},
+	
+	convert_array: function (o) {
+		if (Array.isArray(o)) {
+			return o;
+		}
+		else if (o && o.indexOf('[') === 0 && o.indexOf(']') === o.length - 1) {
+			return JSON.parse(o);
+		}
+		else {
+			return [o];
+		}		
+	},
+	
+	check_badge: function(callback) {
+		var evt = document.createEvent('Event');
+		
+		evt.initEvent('check_badge', true, true);
+
+		window.dispatchEvent(evt);
+		
+		evt = null;
+	},
+};
