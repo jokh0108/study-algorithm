@@ -48,11 +48,12 @@ def bfs(v):
                     print_visited(visited)
                     if board[xxx][yyy] == 'K':
                         cnt += 1
-    print(cnt, house_num, 'z'*10)
-    return cnt == house_num
+                        if cnt == house_num:
+                            return True
+    return False
 
 while start <= end:
-    print('new start !!!!!!!!!!!!!!!!!!')
+    print('new start !!!!!!!!!!!!!!!!!! with ', flatten_height[start], flatten_height[end])
     possible = bfs(post_pos)
     if possible:
         print('possible!!!!!!!!!!!!!!!!!')
