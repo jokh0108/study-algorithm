@@ -7,7 +7,12 @@ def find(x):
   if root[x] == x:
     return x
   else:
-    return find(root[x])
+    # Basic
+    # return find(root[x])
+
+    # Path Compression
+    root[x] = find(root[x])
+    return root[x]
 
 def union(x, y):
   x = find(x)
@@ -41,3 +46,13 @@ for i in range(len(root)):
     disjoint_set[parent] = set()
     disjoint_set[parent].add(i)
 print(disjoint_set)
+
+def find(x):
+  if root[x] == x:
+    return x
+  return find(root[x])
+
+def union(x, y):
+  x = find(x)
+  y = find(y)
+  root[y] = x
