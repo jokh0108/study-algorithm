@@ -1,7 +1,34 @@
-# 86.4%
+# not completed 86.4%
+
 
 def convert_to_ms(h, m, s):
     return int((h*3600 + m * 60 + s)*1000)
+
+
+def check(lines, answer, start, plus):
+    for i in range(len(lines)):
+        cnt = 0
+        if start and plus:
+            a, b = lines[i][0], lines[i][0] + 999
+        elif start and not plus:
+            a, b = lines[i][0] - 999, lines[i][0]
+        elif not start and plus:
+            a, b = lines[i][1], lines[i][1] + 999
+        elif not start and not plus:
+            a, b = lines[i][1] - 999, lines[i][1]
+
+        for j in range(len(lines)):
+            left, right = lines[j]
+            if a <= left <= b:
+                print(f'a: {a}, left: {left}, b: {b}')
+                cnt += 1
+            elif a <= right <= b:
+                print(f'a: {a}, right: {right}, b: {b}')
+                cnt += 1
+        if answer < cnt:
+            answer = cnt
+    return answer
+
 
 def solution(lines):
     answer = 0
@@ -17,35 +44,10 @@ def solution(lines):
         converted_lines.append((start, end))
     converted_lines = sorted(converted_lines, key = lambda x: x[0])
     print(*converted_lines, sep='\n')
-    print('start')
-    for i in range(len(converted_lines)):
-        cnt = 0
-        start, start_plus_1sec = converted_lines[i][0], converted_lines[i][0] + 999
-        for j in range(len(converted_lines)):
-            left, right = converted_lines[j]
-            if start <= left <= start_plus_1sec:
-                print(f'{start}, left: {left}, {start_plus_1sec}')
-                cnt += 1
-            elif start <= right <= start_plus_1sec:
-                print(f'{start}, right: {right}, {start_plus_1sec}')
-                cnt += 1
-        if answer < cnt:
-            answer = cnt       
-    print('end') 
-    converted_lines = sorted(converted_lines, key = lambda x: x[1])
-    for i in range(len(converted_lines)):
-        cnt = 0
-        end, end_plus_1sec = converted_lines[i][1], converted_lines[i][1] + 999
-        for j in range(len(converted_lines)):
-            left, right = converted_lines[j]
-            if end <= left <= end_plus_1sec:
-                print(f'{end}, left: {left}, {end_plus_1sec}')
-                cnt += 1
-            elif end <= right <= end_plus_1sec:
-                print(f'{end}, right: {right}, {end_plus_1sec}')
-                cnt += 1
-        if answer < cnt:
-            answer = cnt            
+    answer = check(converted_lines, answer, True, True)
+    answer = check(converted_lines, answer, True, False)
+    answer = check(converted_lines, answer, False, True)
+    answer = check(converted_lines, answer, False, False)
     return answer
 
 
