@@ -33,7 +33,7 @@ def solution(n, t, m, timetable):
             copied_tt.insert(idx, con)
         print(bus_timetable)
         print(copied_tt)
-        
+
         bus_idx = 0
         tt_idx = 0
         boarded = 0
@@ -55,7 +55,7 @@ def solution(n, t, m, timetable):
                     bus_idx += 1
                     boarded = 0
                     break
-        if con_boarded: 
+        if con_boarded:
             print('con boarded', con_time)
             answer = con_time
         else:
