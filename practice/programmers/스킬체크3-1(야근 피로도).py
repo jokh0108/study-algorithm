@@ -17,7 +17,7 @@ def solution(n, works):
         new_work = heapq.heappop(max_heap)[1] - 1
         heapq.heappush(max_heap, (-new_work, new_work))
         n -= 1
-        # print_heap(max_heap)
+        print_heap(max_heap)
     # print(max_heap)
 
     answer = 0
@@ -25,7 +25,7 @@ def solution(n, works):
         answer += x ** 2
     return answer
 
-print(solution(4, [4, 3, 3]))
-print(solution(1, [2, 1, 2]))
-print(solution(3, [1, 1]))
-# print(solution(10, [1, 5, 4, 6, 5, 4, 8, 3,4, 7, 2, 5, 2]))
+# print(solution(4, [4, 3, 3]))
+# print(solution(1, [2, 1, 2]))
+# print(solution(3, [1, 1]))
+print(solution(10, [1, 5, 4, 6, 5, 4, 8, 3,4, 7, 2, 5, 2]))

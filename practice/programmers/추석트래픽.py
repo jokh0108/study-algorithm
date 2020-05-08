@@ -2,7 +2,7 @@
 
 
 def convert_to_ms(h, m, s):
-    return int((h*3600 + m * 60 + s)*1000)
+    return int((h*3600*1000 + m * 60*1000 + s*1000))
 
 
 def check(lines, answer, start, plus):
