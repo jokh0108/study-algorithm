@@ -1,0 +1,4 @@
+native-country=United-States,race=White,capital-loss=None
+native-country=United-States,race=White,capital-gain=None
+race=White,capital-gain=None,capital-loss=None
+native-country=United-States,capital-gain=None,capital-loss=None

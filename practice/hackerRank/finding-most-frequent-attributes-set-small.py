@@ -1,6 +1,11 @@
 from collections import Counter
 from itertools import combinations
 
+pnum = 3
+path = f"p4_inputs/input00{pnum}.txt"
+f = open(path, 'r')
+input = f.readline
+
 num_of_attrs = int(input())
 threshold = float(input())
 num_of_rows = int(input())

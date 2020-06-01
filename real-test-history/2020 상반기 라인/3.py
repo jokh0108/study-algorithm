@@ -40,6 +40,7 @@ def solution(road, n):
     answer = 0
     i, j = 0, 0
     cnt = 0
+    # Two Pointer 전략 이전에 그냥 완전 탐색(i, j)
     while i <= j and i < len(road) and j < len(road):
         if road[j] == '1':
             cnt += 1
@@ -52,6 +53,7 @@ def solution(road, n):
                 if answer < cnt:
                     answer = cnt
             else:
+                # i 값을 뒤로함으로써 j 값을 늘리지 않음
                 if road[i] == '0':
                     n += 1
                 cnt -= 1
