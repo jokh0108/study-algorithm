@@ -1,6 +1,7 @@
 n = int(input())
 league = {}
 
+
 def update_league(league, team, win1, win2):
     if team not in league:
         league[team] = [1 if win1 > win2 else 0, win1 - win2]
@@ -8,7 +9,8 @@ def update_league(league, team, win1, win2):
         league[team][0] += 1 if win1 > win2 else 0
         league[team][1] += win1 - win2
 
-for _ in range(n*(n-1)):
+
+for _ in range(n * (n - 1)):
     team1, win1, team2, win2 = input().split()
     win1, win2 = int(win1), int(win2)
     update_league(league, team1, win1, win2)
