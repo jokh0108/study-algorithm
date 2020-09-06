@@ -4,6 +4,7 @@ def divide(arr, divisor):
         quotient += snack_len // divisor
     return quotient
 
+
 def binary_search(arr, left, right, k):
     max_possible_len = 0
     while left <= right:
@@ -26,7 +27,7 @@ def binary_search(arr, left, right, k):
 n, k = map(int, input().split())
 arr = []
 for _ in range(n):
-    arr.append(int(float(input())*(10**11)))
+    arr.append(int(float(input()) * (10 ** 11)))
 max_len = max(arr)
 result = binary_search(arr, 0, max_len, k)
-print(f'{float(result) / (10**11):.2f}')
+print(f'{float(result) / (10 ** 11):.2f}')
