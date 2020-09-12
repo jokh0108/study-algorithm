@@ -11,7 +11,7 @@ def union(x, y):
     root[y] = x
 
 
-def isParentSame(x, y):
+def is_parent_same(x, y):
     return find(x) == find(y)
 
 
@@ -39,7 +39,7 @@ print(*adjacent_list, sep='\n')
 total = 0
 for info in adjacent_list:
     x, y, cost = info
-    if not isParentSame(x, y):
+    if not is_parent_same(x, y):
         total += cost
         union(x, y)
         print(x, y, cost, total, root)

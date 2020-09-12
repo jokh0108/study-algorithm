@@ -9,7 +9,7 @@ adjacent_list.append((3, 6, 8))
 adjacent_list.append((4, 5, 9))
 adjacent_list.append((5, 6, 5))
 
-EDGE_NUM = 6
+EDGE_NUM = 7
 
 print(*adjacent_list, sep='\n')
 
