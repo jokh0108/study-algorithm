@@ -2,18 +2,27 @@ from typing import List
 
 
 class Solution:
-    def palindromePairs(self, words: List[str]) -> List[List[int]]:
-        def is_palindrome(word):
-            return word == word[::-1]
-        pairs = set()
-        for i, a in enumerate(words):
-            for j, b in enumerate(words):
-                if i == j:
-                    continue
-                if is_palindrome(a+b):
-                    pairs.add((i, j))
-        return [list(pair) for pair in pairs]
+    def fib(self, n: int) -> int:
+        # Soluntion 1: Recursive
+
+        # if n <= 1:
+        #     return n
+        # return self.fib(n-1) + self.fib(n-2)
+
+        # Solution 2: Iterative
+
+        fib = [0, 1] + [0] * 30
+        for i in range(2, 31):
+            fib[i] = fib[i-1] + fib[i-2]
+        return fib[n]
 
 
 solution = Solution()
-print(solution.palindromePairs(["abcd", "dcba", "lls", "s", "sssll"]))
+print(solution.fib(2))
+print(solution.fib(2))
+print(solution.fib(3))
+print(solution.fib(4))
+print(solution.fib(5))
+print(solution.fib(6))
+print(solution.fib(7))
+print(solution.fib(8))
