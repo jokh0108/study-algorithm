@@ -15,13 +15,8 @@ function solution(n, arr1, arr2) {
     let b2 = toBinary(n, arr2[i]);
     [a2, b2] = a2.length < b2.length ? [b2, a2] : [a2, b2];
     const union = a2
-      .map((x, i) => {
-        const y = b2[i] ? b2[i] : 0;
-        const sum = x + y > 1 ? 1 : x + y;
-        return sum;
-      })
-      .map((x) => x.toString(10))
-      .map((x) => (x === "1" ? "#" : " "))
+      .map((x, i) => b2[i] | x)
+      .map((x) => (x === 1 ? "#" : " "))
       .join("");
     return union;
   });
