@@ -64,38 +64,25 @@ def solution(words, queries):
     for word in words:
         if len(word) in trie_dict:
             trie_dict[len(word)].insert(word)
+            reverse_trie_dict[len(word)].insert(word[::-1])
         else:
             trie = Trie()
             trie.insert(word)
             trie_dict[len(word)] = trie
 
-        if len(word) in reverse_trie_dict:
-            reverse_trie_dict[len(word)].insert(word[::-1])
-        else:
             trie = Trie()
             trie.insert(word[::-1])
             reverse_trie_dict[len(word)] = trie
 
     print(trie_dict, reverse_trie_dict)
     for query in queries:
-        if query[0] != "?":
-            index = query.find("?")
-            prefix, tail = query[:index], query[index:]
-            print(query)
-            if len(query) in trie_dict:
-                print(trie_dict[len(query)])
-                count = trie_dict[len(query)].starts_with(prefix)
-            else:
-                count = 0
-            answer.append(count)
-            continue
-        print(query)
-        query = query[::-1]
+        dictionary = trie_dict
+        if query[0] == "?":
+            query = query[::-1]
+            dictionary = reverse_trie_dict
         index = query.find("?")
-        prefix, tail = query[:index], query[index:]
-        if len(query) in reverse_trie_dict:
-            print(reverse_trie_dict[len(query)])
-            count = reverse_trie_dict[len(query)].starts_with(prefix)
+        if len(query) in dictionary:
+            count = dictionary[len(query)].starts_with(query[:index])
         else:
             count = 0
         answer.append(count)
