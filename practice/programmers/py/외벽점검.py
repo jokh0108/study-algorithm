@@ -1,67 +1,36 @@
-minimum = 10
-d = {}
+import collections
 
 
-# recurse 안에서 시계 / 반시계
-
-def recurse(weak, dist, cnt, n, clockwise):
-    global minimum
-    global d
-    print(56, weak, dist, cnt)
-    if not weak:
-        if minimum > cnt:
-            minimum = cnt
-        return
-    elif len(weak) == 1:
-        if minimum > cnt+1:
-            minimum = cnt +1
-        return
-    else:
-        key = tuple(sorted(list(weak)))
-        if d.get(key):
-            if len(d[key]) >= len(dist):
-                return
-            else:
-                d[key] = dist
+def solution(n, weaks, dists):
+    def filter_weaks(a, b, weaks) -> tuple:
+        if a < 0:
+            new_weaks = set(filter(lambda x: b < x < n + a, weaks))
+        elif b >= n:
+            new_weaks = set(filter(lambda x: b - n < x < a, weaks))
         else:
-            d[key] = dist
+            new_weaks = set(filter(lambda x: 0 <= x < a or b < x < n, weaks))
+        return tuple(sorted(new_weaks))
 
-    if dist:
-        friend = dist.pop()
-    else:
-        return
-    for w in weak:
-        todo = weak.copy()
-        #clock
-        print(12, "friend", friend)
-        steps = range(w, w+friend+1) if clockwise else range(w , w-friend-1, -1)
-        for k in steps:
-            k = k % n
-            print(k, end=' ')
-            if k in todo:
-                todo.remove(k)
-        print()
-        if todo == weak: # 더 이상 답이 없음 => 지우려고 해봐도 안지워짐
-            return
-        else:
-            recurse(todo, dist[:], cnt + 1, n, clockwise)
-
-        #counter
-
-
-def solution(n, weak, dist):
-    global minimum
-    global d
-    minimum = 10
-    d = {}
-    dist = sorted(dist)
-    recurse(set(weak), dist[:], 0, n, True)
-    print(d)
-    d = {}
-    recurse(set(weak), dist[:], 0, n, False)
-    print(d)
-    return minimum
+    dists = sorted(dists)[::-1]
+    q = collections.deque([(0, tuple(weaks))])
+    weak_set = set()
+    while q:
+        index, cur_weaks = q.popleft()
+        if index == len(dists):
+            return -1
+        dist = dists[index]
+        for weak in cur_weaks:
+            # [counter, clockwise]
+            for a, b in [(weak - dist, weak), (weak, weak + dist)]:
+                remained_weaks = filter_weaks(a, b, cur_weaks)
+                if not remained_weaks:
+                    return index + 1
+                if remained_weaks not in weak_set:
+                    weak_set.add(remained_weaks)
+                    q.append((index + 1, remained_weaks))
+        print("next dist", q)
+    return len(dists)
 
 
-print("answer", solution(12, [1, 5, 6, 10], [1, 2, 3, 4]))
-print("answer", solution(12, [1, 3, 4, 9, 10], [3, 5, 7]))
+print(solution(12, [1, 5, 6, 10], [1, 2, 3, 4]))
+print(solution(12, [1, 3, 4, 9, 10], [3, 5, 7]))
