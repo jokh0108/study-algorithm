@@ -33,10 +33,8 @@ def solution(user_ids, banned_ids):
             while q:
                 popped_set = q.popleft()
                 for c in itertools.combinations(ids, r):
-                    new_q.append(popped_set | set(c))
+                    new_q.append(tuple(set(popped_set) | set(c)))
         q = new_q
-    print(q)
-
     answer = 0
     for banned_set in q:
         if len(banned_set) == len(banned_ids):
